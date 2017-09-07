@@ -4,8 +4,6 @@ import './App.css';
 import $ from 'jquery';
 import GradeComponent from './gradeComponent.js';
 
-var jexcel=require('json2excel');
-
 class App extends Component {
   constructor(){
     super();
@@ -37,6 +35,8 @@ class App extends Component {
          },
          async:false
      });
+     
+     
   }
 
   updateCurrentDate(e){
@@ -61,7 +61,10 @@ class App extends Component {
         this.setState({grades: grades});
   }
   render() {
+
     return (
+
+      
     <div>
        <h2>Select Grades</h2>
 
