@@ -3,27 +3,30 @@ import logo from './logo.svg';
 import './App.css';
 import $ from 'jquery';
 import GradeComponent from './gradeComponent.js';
+import Workbook from 'react-excel-workbook'
 
 class App extends Component {
   constructor(){
     super();
     this.state = {
       grades: [],
+      employees: [],
       currentGrade: ''
     }
     this.updateCurrentDate = this.updateCurrentDate.bind(this);
-    this.getEmployeesById = this.getEmployeesById.bind(this);
+    this.getEmployees = this.getEmployees.bind(this);
+    this.getEmployeesByGrade = this.getEmployeesByGrade.bind(this);
   }
 
-  getEmployeesById(){
+  getEmployees(){
     let url = '';
     if(this.state.currentGrade === 'allGrades'){
       url = 'http://localhost:4000/api/employees';
     }
     else{
-      url = 'http://localhost:4000/api/grades/' + this.state.currentGrade + '/employees';
+      url = 'http://localhost:4000/api/grades/' + this.state.currentGrade  + '/employees';
     }
-    let employees = [];
+    let employees = this.state.employees;
     this.serverRequest = $.ajax({
          url: url,
          error: function (e) {
@@ -35,8 +38,15 @@ class App extends Component {
          },
          async:false
      });
-     
-     
+    this.setState((prevState, props) => {
+      return {employees: employees};
+    });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.employees != prevState.employees) {
+      this.inputElement.click(); 
+    }
   }
 
   updateCurrentDate(e){
@@ -58,29 +68,62 @@ class App extends Component {
             async:false
         });
 
-        this.setState({grades: grades});
+        this.setState({grades: grades});      
   }
-  render() {
 
-    return (
+  getEmployeesByGrade(grade){
+    let employees = [];
+    for (var i = 0; i < this.state.employees.length; i++){
+      if(this.state.employees[i].grade === grade){
+        employees.push(this.state.employees[i]);
+      }   
+    }
+     return employees;
+  }
 
-      
-    <div>
-       <h2>Select Grades</h2>
-
-        <select onChange={this.updateCurrentDate} >
-          <option></option>
-          <option value="allGrades">All Grades</option>
-          {this.state.grades.map((grade, index)=>{
-            return (
-                <GradeComponent grade={grade.grade} key={index}/>
+  showAllEmployees(){
+    return(
+        this.state.grades.map((grade, index)=>{
+          return (
+              <Workbook.Sheet data={this.getEmployeesByGrade(grade.grade)} name={grade.grade}>
+                <Workbook.Column label="Name" value="name"/>
+                <Workbook.Column label="Email" value="email"/>
+              </Workbook.Sheet>
             );
-          })}
-        </select>
+          })
+    );
+  }
 
-        <button onClick={this.getEmployeesById}>Submit</button>
-    </div>
-   
+  showEmployeesByGrade(){
+    return(
+          <Workbook.Sheet data={this.state.employees} name={this.state.currentGrade}>
+            <Workbook.Column label="Name" value="name"/>
+            <Workbook.Column label="Email" value="email"/>
+          </Workbook.Sheet>
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        <h2>Select Grades</h2>
+
+          <select onChange={this.updateCurrentDate} >
+            <option></option>
+            <option value="allGrades">All Grades</option>
+            {this.state.grades.map((grade, index)=>{
+              return (
+                  <GradeComponent grade={grade.grade} key={index}/>
+              );
+            })}
+          </select>
+
+          <button onClick={this.getEmployees}>Submit</button>  
+
+          <Workbook filename="example.xlsx"  element={<button className="hide" ref={input => this.inputElement = input} style={{ visibility:'hidden' }}/>}>
+            {this.state.currentGrade === "allGrades"? this.showAllEmployees(): this.showEmployeesByGrade()}
+          </Workbook>
+      </div>
     );
   }
 }
