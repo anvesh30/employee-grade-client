@@ -3,7 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import $ from 'jquery';
 import GradeComponent from './gradeComponent.js';
-import Workbook from 'react-excel-workbook'
+import Workbook from 'react-excel-workbook';
 
 class App extends Component {
   constructor(){
@@ -46,6 +46,7 @@ class App extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (this.state.employees != prevState.employees) {
       this.inputElement.click(); 
+
     }
   }
 
